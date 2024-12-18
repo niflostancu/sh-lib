@@ -89,6 +89,15 @@ function @silent() {
     "$@" >/dev/null 2>&1
 }
 
+# Interpolates multiple curly braced '{{VARIABLE}}'s within a given TEMPLATE.
+# Uses env's syntax for VAR[=VALUE], first argument is the TEMPLATE.
+function sh_interpolate_vars() {
+    local TEMPLATE="$1"; shift
+    for var in "$@"; do
+        TEMPLATE="${TEMPLATE//"{{${var%%=*}}}"/"${var#*=}"}"
+    done
+    printf "%s" "$TEMPLATE"
+}
 
 ##============================================================================##
 ##-------------------------- Function/module helpers -------------------------##
