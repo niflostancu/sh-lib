@@ -82,3 +82,14 @@ _comm() {
     _comm; sh_log_debug "This is a DEBUG message!" >&3
 }
 
+_log_cb_test() {
+    echo "Hey, LOG_CB_CALLED!"
+}
+
+@test "logging callback" {
+    import-base
+    SH_LOG_CALLBACK=_log_cb_test
+    run -0 sh_log_info "Lets test this"
+    [ -n "$output" ] && [[ "$output" == *'LOG_CB_CALLED'* ]]
+}
+
