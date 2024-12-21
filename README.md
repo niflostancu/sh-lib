@@ -26,9 +26,9 @@ source "$SCRIPT_BASE/lib/base.sh"
 
 Color printing & logging routines:
 ```sh
-color_print "red" "Code red"
-color_print -n "blue" "Feeling blue, no newline appended!"
-color_print "b-green" "Bold green (if terminal supports)"
+sh_cecho "red" "Code red"
+sh_cecho -n "blue" "Feeling blue, no newline appended!"
+sh_cecho "b-green" "Bold green (if terminal supports)"
 
 sh_log_info "Information here!"
 sh_log_error "Something bad happened!"
@@ -37,4 +37,8 @@ sh_log_panic "PANIC: will print this error and exit 1!"
 DEBUG=1
 sh_log_debug "Printed only if \$DEBUG=1"
 ```
+
+## Installation
+
+You can use 
 

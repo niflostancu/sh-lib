@@ -10,7 +10,7 @@ import-base() {
 	import-base
 
 	# test silencing stdout
-	run bats_pipe -0 @silent color_echo red "hello" \| xxd
+	run bats_pipe -0 @silent sh_cecho red "hello" \| xxd
 	[ -z "$output" ]
 
 	# test silencing stderr

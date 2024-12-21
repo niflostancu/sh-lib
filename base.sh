@@ -23,38 +23,40 @@ fi
 export TERM_COLORS
 
 # Associative map with log level colors & ANSI constants
-declare -g -A COLOR_PRINT_MAP=(
+declare -g -A SH_COLOR_PRINT_MAP=(
 	['black']=30    ['red']=31       ['green']=32
 	['yellow']=33   ['blue']=34      ['magenta']=35
 	['cyan']=36     ['white']=37     ['default']=39
 )
 # supplementary text styles ("b-<color>" for bold etc, '*<color>' for bright)
-for c in "${!COLOR_PRINT_MAP[@]}"; do
-	_cc="${COLOR_PRINT_MAP[$c]}"
-	COLOR_PRINT_MAP+=( ["b-$c"]="1;$_cc" ["i-$c"]="3;$_cc" ["u-$c"]="4;$_cc"
+for c in "${!SH_COLOR_PRINT_MAP[@]}"; do
+	_cc="${SH_COLOR_PRINT_MAP[$c]}"
+	SH_COLOR_PRINT_MAP+=( ["b-$c"]="1;$_cc" ["i-$c"]="3;$_cc" ["u-$c"]="4;$_cc"
 		["x-$c"]="2;$_cc" ["*$c"]="$(( _cc + 60 ))" )
 done
 
-# Usage: color_echo [-ne] COLOR TEXT...
-function color_echo() {
+# Usage: sh_cecho [-ne] COLOR TEXT...
+function sh_cecho() {
 	local EARGS=() ESC=$'\e[' RST=$'\e[0m'
 	while [[ $# -gt 1 ]]; do case "$1" in
 		-*) EARGS+=("$1"); ;;
 		*) break; ;;
 	esac; shift; done
-	local COLOR="${COLOR_PRINT_MAP[$1]}"; shift
+	local COLOR="${SH_COLOR_PRINT_MAP[$1]}"; shift
 	[[ -n "$COLOR" ]] || return 1
 	# handle color aliases:
-	[[ ! -v "COLOR_PRINT_MAP[$COLOR]" ]] || COLOR="${COLOR_PRINT_MAP[$COLOR]}"
+	[[ ! -v "SH_COLOR_PRINT_MAP[$COLOR]" ]] || COLOR="${SH_COLOR_PRINT_MAP[$COLOR]}"
 	COLOR="${ESC}${COLOR}m"
 	[[ -n "$TERM_COLORS" ]] || { COLOR=''; ESC=''; RST=''; }
 	# finally, compose the message
 	echo "${EARGS[@]}" "${COLOR}$*${RST}";
 }
+# and some aliases:
+function sh_color_echo() { sh_cecho "$@"; }
 
 ## ---- Logging functions ----
 # log colors (alias key from the same map)
-COLOR_PRINT_MAP+=([debug]="cyan" [info]="b-green" [err]="b-red" [emerg]="b-red")
+SH_COLOR_PRINT_MAP+=([debug]="cyan" [info]="b-green" [err]="b-red" [emerg]="b-red")
 # environment log prefix: prepended to all logged messages
 SH_LOG_PREFIX=${SH_LOG_PREFIX:-}
 # you can register a logging callback (e.g., to also send to syslog)
@@ -67,7 +69,7 @@ function sh_log() {
 	local LEVEL="$1"; shift
 	[[ "$LEVEL" != "error" ]] || LEVEL="err"
 	! sh_is_function "$SH_LOG_CALLBACK" || "$SH_LOG_CALLBACK" "$LEVEL" "$*"
-	color_echo "$LEVEL" "${SH_LOG_PREFIX:+"$SH_LOG_PREFIX: "}$*"
+	sh_cecho "$LEVEL" "${SH_LOG_PREFIX:+"$SH_LOG_PREFIX: "}$*"
 }
 
 # only logs if the DEBUG variable is non-null

@@ -23,42 +23,42 @@ _comm() {
 	export TERM_COLORS=1
 
 	# compare binary output
-	run bats_pipe -0 color_echo red "hello" \| xxd
+	run bats_pipe -0 sh_cecho red "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[31mhello\e[0m\n' | xxd)" ]
 	# also test -n parameter
-	run bats_pipe -0 color_echo -n red "hello" \| xxd
+	run bats_pipe -0 sh_cecho -n red "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[31mhello\e[0m' | xxd)" ]
-	_comm; color_echo red "Hello in red" >&3
+	_comm; sh_cecho red "Hello in red" >&3
 
-	run bats_pipe -0 color_echo '*red' "hello" \| xxd
+	run bats_pipe -0 sh_cecho '*red' "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[91mhello\e[0m\n' | xxd)" ]
-	_comm; color_echo '*red' "Hello in *red" >&3
+	_comm; sh_cecho '*red' "Hello in *red" >&3
 
-	run bats_pipe -0 color_echo b-red "hello" \| xxd
+	run bats_pipe -0 sh_cecho b-red "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[1;31mhello\e[0m\n' | xxd)" ]
-	_comm; color_echo b-red "Hello in b-red" >&3
+	_comm; sh_cecho b-red "Hello in b-red" >&3
 
-	run bats_pipe -0 color_echo green "hello" \| xxd
+	run bats_pipe -0 sh_cecho green "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[32mhello\e[0m\n' | xxd)" ]
-	_comm; color_echo green "Hello in green" >&3
+	_comm; sh_cecho green "Hello in green" >&3
 
-	run bats_pipe -0 color_echo blue "hello" \| xxd
+	run bats_pipe -0 sh_cecho blue "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[34mhello\e[0m\n' | xxd)" ]
-	_comm; color_echo blue "Hello in blue" >&3
+	_comm; sh_cecho blue "Hello in blue" >&3
 
-	run bats_pipe -0 color_echo u-cyan "hello" \| xxd
+	run bats_pipe -0 sh_cecho u-cyan "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[4;36mhello\e[0m\n' | xxd)" ]
-	_comm; color_echo u-cyan "Hello in u-cyan" >&3
+	_comm; sh_cecho u-cyan "Hello in u-cyan" >&3
 
-	run bats_pipe -0 color_echo i-magenta "hello" \| xxd
+	run bats_pipe -0 sh_cecho i-magenta "hello" \| xxd
 	[ "$output" = "$(echo -n $'\e[3;35mhello\e[0m\n' | xxd)" ]
-	_comm; color_echo i-magenta "Hello in i-magenta" >&3
+	_comm; sh_cecho i-magenta "Hello in i-magenta" >&3
 }
 
-@test "color_echo with invalid color" {
+@test "sh_cecho with invalid color" {
 	import-base
 	export TERM_COLORS=1
-	run ! color_echo "invalid" "invalid color"
+	run ! sh_cecho "invalid" "invalid color"
 }
 
 @test "logging functions" {
