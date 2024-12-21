@@ -3,21 +3,20 @@
 bats_require_minimum_version 1.5.0
 
 import-base() {
-    source /code/base.sh
+	source /code/base.sh
 }
 
 @test "silence" {
-    import-base
+	import-base
 
-    # test silencing stdout
-    run bats_pipe -0 @silent color_echo red "hello" \| xxd
-    [ -z "$output" ]
+	# test silencing stdout
+	run bats_pipe -0 @silent color_echo red "hello" \| xxd
+	[ -z "$output" ]
 
 	# test silencing stderr
-    run -0 @silent sh_log_error "error goes to stderr"
-    [ -z "$output" ]
+	run -0 @silent sh_log_error "error goes to stderr"
+	[ -z "$output" ]
 }
-
 
 @test "curly template interpolation" {
 	import-base
