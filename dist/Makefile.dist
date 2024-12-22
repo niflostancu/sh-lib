@@ -4,6 +4,8 @@
 # Simply copy it inside your e.g., lib/ directory (+ rename to Makefile)
 # then invoke dev-upgrade target. Modify as required.
 
+# vim: set filetype=make:
+
 # sh-lib fetch parameters
 SH_LIB_VERSION = main
 SH_LIB_FETCH_URL = https://raw.githubusercontent.com/niflostancu/sh-lib/refs/heads/{VERSION}
@@ -41,4 +43,5 @@ distclean:
 
 .PHONY: FORCE 
 FORCE:
+
 
