@@ -1,6 +1,7 @@
 #!/bin/bash
 : <<'DOCS'
-Base bash functions library with the following utils:
+Base bash functions library
+https://github.com/niflostancu/sh-lib
 
 * color print / debug routines;
 * captioned / indented / silent printing of a function's output;
@@ -89,6 +90,20 @@ function sh_log_panic() { sh_log "emerg" "$@" >&2; exit 1; }
 # Silences the output of a command (use in front)
 function @silent() {
 	"$@" >/dev/null 2>&1
+}
+
+# Removes whitespace from beginning/end of string
+function sh_str_trim() {
+	local VAR="$1"
+	VAR="${VAR#"${VAR%%[![:space:]]*}"}"
+	VAR="${VAR%"${VAR##*[![:space:]]}"}"    
+	echo -n "$VAR"
+}
+
+# Checks if a string contains a given substring
+# str_contains NEEDLE HAYSTACK
+function sh_str_contains() {
+	[[ "$1" == *"$2"* ]]
 }
 
 # Interpolates multiple curly braced '{{VARIABLE}}'s within a given TEMPLATE.

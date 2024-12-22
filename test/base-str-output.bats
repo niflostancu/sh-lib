@@ -18,6 +18,27 @@ import-base() {
 	[ -z "$output" ]
 }
 
+@test "str trim" {
+	import-base
+	
+	run -0 sh_str_trim "	   LSPACE"
+	[ "$output" = "LSPACE" ]
+
+	run -0 sh_str_trim "RSPACE	"
+	[ "$output" = "RSPACE" ]
+
+	run -0 sh_str_trim "	   SPACES		"
+	[ "$output" = "SPACES" ]
+}
+
+@test "str contains" {
+	import-base
+	run sh_str_contains "x" "1x71jasd781"
+	run ! sh_str_contains "Y" "171jxasd781"
+	run sh_str_contains "hello" "hello world"
+	run ! sh_str_contains "HELLO" "Hey HeLlo there!"
+}
+
 @test "curly template interpolation" {
 	import-base
 	TEST_TPL='Hello {{NAME}},
