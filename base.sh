@@ -120,6 +120,12 @@ function sh_interpolate_vars() {
 ##-------------------------- Function/module helpers -------------------------##
 ##----------------------------------------------------------------------------##
 
+# returns the path to the current script (the one invoking the function)
+function sh_get_script_path() {
+	cd -- "$(dirname -- "${BASH_SOURCE[1]}")" &>/dev/null && pwd
+}
+
+# checks whether a bash function was defined
 function sh_is_function() {
 	[[ -n "$1" && $(type -t "$1") == "function" ]]
 }
