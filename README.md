@@ -40,5 +40,22 @@ sh_log_debug "Printed only if \$DEBUG=1"
 
 ## Installation
 
-You can use 
+1. Using Git Submodules
+
+Recommended only if you already use git submodules in your project:
+```sh
+# will clone this repo as submodule inside the ./sh-lib directory
+git submodule add "https://github.com/niflostancu/sh-lib.git" ./sh-lib
+```
+
+2. Manual and/or Makefile-managed distribution
+
+You can use wget to manually download the desired script, e.g.:
+```sh
+wget -O lib/base.sh "https://raw.githubusercontent.com/niflostancu/sh-lib/refs/heads/main/base.sh"
+chmod lib/base.sh
+```
+
+Or you can use Makefile script to do that, check out this sample:
+[dist/Makefile.dist](./dist/Makefile.dist)
 
