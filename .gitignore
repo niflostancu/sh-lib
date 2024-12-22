@@ -1,0 +1,4 @@
+dist/*.sh
+dist/LICENSE
+dist/README*
+
