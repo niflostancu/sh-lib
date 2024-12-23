@@ -14,7 +14,8 @@ import-mods() {
 }
 import-newmods() {
 	source /code/base.sh
-	SH_MOD_PATH="$SAMPLE_DIR/newlib:$SAMPLE_DIR/lib"
+	SH_MOD_PATH="$SAMPLE_DIR/lib"
+	sh_path_prepend SH_MOD_PATH "$SAMPLE_DIR/newlib"
 }
 
 @test "script module path" {
@@ -97,7 +98,7 @@ function _import_bad_seterr() {
 
 @test "module parent import from overrides" {
 	import-newmods
-	SH_MOD_PATH=":$SAMPLE_DIR/newoverrides2:$SH_MOD_PATH:"
+	sh_path_prepend SH_MOD_PATH "$SAMPLE_DIR/newoverrides2"
 	FILES_IMPORT_PARENTS=1
 	@import 'allmodrec'
 

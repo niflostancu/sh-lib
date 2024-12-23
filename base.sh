@@ -116,6 +116,22 @@ function sh_interpolate_vars() {
 	printf "%s" "$TEMPLATE"
 }
 
+# Checks if a separated path list ($1) contains an element ($2)
+function sh_path_contains() {
+	local SEP=${SEP:-':'}
+	[[ "${SEP}$1${SEP}" == *"${SEP}$2${SEP}"* ]] || return 1
+}
+# Appends an element ($2) to a colon-separated path list ($1 - var. name)
+function sh_path_append() {
+	local -n _VAR="$1"
+	_VAR="${_VAR:+"${_VAR}${SEP:-":"}"}$2"
+}
+# Prepends an element ($2) to a colon-separated path list ($1 - var. name)
+function sh_path_prepend() {
+	local -n _VAR="$1"
+	_VAR="$2${_VAR:+"${SEP:-":"}${_VAR}"}"
+}
+
 ##============================================================================##
 ##----------------------- Bash function/module helpers -----------------------##
 ##----------------------------------------------------------------------------##
@@ -210,11 +226,11 @@ function sh_hooks_run() {
 # if the function name is prefixed by '-', the hook is prepended
 function sh_hooks_add() {
 	[[ -v _SH_FUNC_HOOKS["$1"] ]] || _SH_FUNC_HOOKS["$1"]=""
-	if [[ ",${_SH_FUNC_HOOKS[$1]}," != *",$2,"* ]]; then
+	if ! SEP=, sh_path_contains "${_SH_FUNC_HOOKS["$1"]}" "$2"; then
 		if [[ "$2" == '-'* ]]; then
-			_SH_FUNC_HOOKS[$1]="${2:1}${_SH_FUNC_HOOKS[$1]:+",${_SH_FUNC_HOOKS[$1]}"}"
+			SEP=, sh_path_prepend "_SH_FUNC_HOOKS[$1]" "${2:1}"
 		else
-			_SH_FUNC_HOOKS[$1]="${_SH_FUNC_HOOKS[$1]:+"${_SH_FUNC_HOOKS[$1]},"}$2"
+			SEP=, sh_path_append "_SH_FUNC_HOOKS[$1]" "$2"
 		fi
 	fi
 }
