@@ -4,9 +4,10 @@ DEBUG?=
 VERBOSE?=
 V?=$(VERBOSE)
 DOCKER?=docker
+DELAY?=
 
 TEST_BATS_IMAGE?=niflostancu/sh-lib-test:latest
-DELAY?=1
+BATS_DELAY?=$(DELAY)
 TEST_BATS_ARGS?= --jobs 1 --print-output-on-failure --formatter pretty
 TEST_BATS_ARGS+=$(if $(V),--show-output-of-passing-tests --verbose-run)
 
@@ -20,6 +21,7 @@ help:
 T ?=
 test:
 	$(s)docker build $(if $(V),,-q) -t "$(TEST_BATS_IMAGE)" test/
-	$(s)$(DOCKER) run -it -e "TERM=$$TERM" -v "$$(pwd):/code:ro" -e "DEBUG=$(DEBUG)" -e BATS_DELAY=$(DELAY) \
+	$(s)$(DOCKER) run -it -e "TERM=$$TERM" -v "$$(pwd):/code:ro" \
+		-e "DEBUG=$(DEBUG)" --env-file <(env | grep '^BATS_') \
 		"$(TEST_BATS_IMAGE)" $(TEST_BATS_ARGS) /code/test/$(T)
 
