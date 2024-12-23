@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -eo pipefail
 source /code/base.sh
 
 export PARENT_PATH=$(sh_get_script_path)

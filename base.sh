@@ -195,3 +195,27 @@ function @import() {
 	sh_log_debug "mod: $__MOD_NAME: loaded!"
 }
 
+# calls all hooks registered for a named event/function
+# usage: hooks_run EVENT_NAME
+function sh_hooks_run() {
+	[[ -v _SH_FUNC_HOOKS["$1"] ]] || return 0
+	IFS=, read -ra hooks <<< "${_SH_FUNC_HOOKS["$1"]}"
+	for fun_ in "${hooks[@]}"; do
+		"$fun_" "$@"
+	done
+}
+
+# appends/prepends a hook function to a given event list
+# usage: hooks_add EVENT_NAME [-]FUNCTION_NAME
+# if the function name is prefixed by '-', the hook is prepended
+function sh_hooks_add() {
+	[[ -v _SH_FUNC_HOOKS["$1"] ]] || _SH_FUNC_HOOKS["$1"]=""
+	if [[ ",${_SH_FUNC_HOOKS[$1]}," != *",$2,"* ]]; then
+		if [[ "$2" == '-'* ]]; then
+			_SH_FUNC_HOOKS[$1]="${2:1}${_SH_FUNC_HOOKS[$1]:+",${_SH_FUNC_HOOKS[$1]}"}"
+		else
+			_SH_FUNC_HOOKS[$1]="${_SH_FUNC_HOOKS[$1]:+"${_SH_FUNC_HOOKS[$1]},"}$2"
+		fi
+	fi
+}
+

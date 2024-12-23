@@ -109,3 +109,21 @@ function _import_bad_seterr() {
 	[[ "$output" == "SECOND!!!" ]]
 }
 
+@test "simple hooks" {
+	import-mods
+	EXPECTED1=$'one\nsecond\nthird'
+	EXPECTED2=$'one\nOTTER'
+
+	@import 'sample-hooks'
+	run -0 sh_hooks_run thehook
+	[[ "$output" == "$EXPECTED1" ]]
+	run -0 sh_hooks_run otterhook
+	[[ "$output" == "$EXPECTED2" ]]
+}
+
+@test "full script with overrides and hooks" {
+	EXPECTED_OTTER=$'{PRE}\none\nOTTER\n{POST}'
+	run -0 bash "$SAMPLE_DIR/full.sh"
+	[[ "$output" == "$EXPECTED_OTTER" ]]
+}
+
