@@ -96,7 +96,7 @@ function @silent() {
 function sh_str_trim() {
 	local VAR="$1"
 	VAR="${VAR#"${VAR%%[![:space:]]*}"}"
-	VAR="${VAR%"${VAR##*[![:space:]]}"}"    
+	VAR="${VAR%"${VAR##*[![:space:]]}"}"
 	echo -n "$VAR"
 }
 
@@ -117,7 +117,7 @@ function sh_interpolate_vars() {
 }
 
 ##============================================================================##
-##-------------------------- Function/module helpers -------------------------##
+##----------------------- Bash function/module helpers -----------------------##
 ##----------------------------------------------------------------------------##
 
 # returns the path to the current script (the one invoking the function)
@@ -128,5 +128,46 @@ function sh_get_script_path() {
 # checks whether a bash function was defined
 function sh_is_function() {
 	[[ -n "$1" && $(type -t "$1") == "function" ]]
+}
+
+# global variable for storing named function hooks
+declare -g -A _SH_FUNC_HOOKS=()
+
+# Import path used by @import utility (colon-separated, like PATH env. var)
+# Contains base.sh's directory by default
+SH_MOD_PATH="$(sh_get_script_path)"
+
+# cache the already imported modules (abs path) to prevent re-importing
+declare -g -A _SH_MODULES_IMPORTED=()
+
+# Sources a '.sh' module (tries all paths in SH_MOD_PATH)
+# Example: @import 'mymodule' (.sh extension is added automatically)
+function @import() {
+	local __MOD_NAME="${*%.sh}" __MOD_PATH=""
+	# split module path into array
+	local -a _MODPATHARR=()
+	IFS=':' read -r -a _MODPATHARR <<< "${SH_MOD_PATH}"
+
+	# determine the absolute path of the requested module
+	if [[ "$*" == /* ]]; then
+		__MOD_PATH="$*"
+	else
+		for p in "${_MODPATHARR[@]}"; do
+			[[ -n "$p" ]] || continue  # ignore empty entries
+			if [[ -f "$p/$__MOD_NAME.sh" ]]; then
+				__MOD_PATH="$p/$__MOD_NAME.sh"; break
+			fi
+		done
+	fi
+	if [[ -z "$__MOD_PATH" || ! -f "$__MOD_PATH" ]]; then
+		sh_log_debug "Module path: '$SH_MOD_PATH'"
+		sh_log_panic "Module not found: '$__MOD_NAME.sh'"
+	fi
+	if [[ -v _SH_MODULES_IMPORTED["$__MOD_PATH"] ]]; then
+		return 0  # module already loaded!
+	fi
+	_SH_MODULES_IMPORTED["$__MOD_PATH"]=1
+	source "$__MOD_PATH"
+	sh_log_debug "mod: $__MOD_NAME: loaded!"
 }
 
