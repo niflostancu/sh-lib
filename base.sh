@@ -143,31 +143,55 @@ declare -g -A _SH_MODULES_IMPORTED=()
 # Sources a '.sh' module (tries all paths in SH_MOD_PATH)
 # Example: @import 'mymodule' (.sh extension is added automatically)
 function @import() {
-	local __MOD_NAME="${*%.sh}" __MOD_PATH=""
+	local __MOD_NAME="" __MOD_PATH="" _PARENT="" _OPTIONAL=""
 	# split module path into array
-	local -a _MODPATHARR=()
-	IFS=':' read -r -a _MODPATHARR <<< "${SH_MOD_PATH}"
+	local -a __MOD_SEARCH_PATH=()
+	while [[ $# -gt 1 ]]; do case "$1" in
+		--opt|--optional) _OPTIONAL=1 ;;
+		-p|--parent) _PARENT=1 ;;
+		-*) sh_log_error "@import: invalid option: $1"; return 1 ;;
+		*) break; ;;
+	esac; shift; done
+	__MOD_NAME="${*%.sh}"
+	if [[ -n "$_PARENT" ]]; then
+		if [[ "$(declare -p __MOD_PARENT_PATH 2>/dev/null)" != 'declare'*'-a'* ]]; then
+			sh_log_error "@import: parent module unavailable in current scope!"; return 1
+		fi
+		__MOD_SEARCH_PATH=("${__MOD_PARENT_PATH[@]}")
+	else
+		IFS=':' read -r -a __MOD_SEARCH_PATH <<< "${SH_MOD_PATH}"
+	fi
 
 	# determine the absolute path of the requested module
-	if [[ "$*" == /* ]]; then
+	if [[ "$*" == /* ]]; then  # module already has absolute path?
 		__MOD_PATH="$*"
 	else
-		for p in "${_MODPATHARR[@]}"; do
-			[[ -n "$p" ]] || continue  # ignore empty entries
-			if [[ -f "$p/$__MOD_NAME.sh" ]]; then
-				__MOD_PATH="$p/$__MOD_NAME.sh"; break
+		for i in "${!__MOD_SEARCH_PATH[@]}"; do
+			[[ -n "${__MOD_SEARCH_PATH[$i]}" ]] || continue  # ignore empty entries
+			if [[ -f "${__MOD_SEARCH_PATH[$i]}/$__MOD_NAME.sh" ]]; then
+				__MOD_PATH="${__MOD_SEARCH_PATH[$i]}/$__MOD_NAME.sh"
+				# provide parent path for modules wishing to import `--parent`s
+				local -a __MOD_PARENT_PATH=("${__MOD_SEARCH_PATH[@]:$(( i + 1 ))}")
+				break
 			fi
 		done
 	fi
+	# prevent double imports using global associative array
 	if [[ -z "$__MOD_PATH" || ! -f "$__MOD_PATH" ]]; then
+		[[ -z "$_OPTIONAL" ]] || return 0
+		sh_log_error "Module not found: '$__MOD_NAME.sh'"
 		sh_log_debug "Module path: '$SH_MOD_PATH'"
-		sh_log_panic "Module not found: '$__MOD_NAME.sh'"
+		return 2
 	fi
 	if [[ -v _SH_MODULES_IMPORTED["$__MOD_PATH"] ]]; then
 		return 0  # module already loaded!
 	fi
 	_SH_MODULES_IMPORTED["$__MOD_PATH"]=1
-	source "$__MOD_PATH"
+	# cleanup temp. vars
+	unset i _OPTIONAL _PARENT __MOD_SEARCH_PATH
+
+	# finally: source the module!
+	source "$__MOD_PATH" || return 3
 	sh_log_debug "mod: $__MOD_NAME: loaded!"
 }
 

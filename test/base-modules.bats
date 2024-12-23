@@ -68,6 +68,14 @@ function _import_bad_seterr() {
 	run ! bash -c "$(declare -p import-newmods); $(declare -p _import_bad_seterr); _import_bad_seterr"
 }
 
+@test "optional modules" {
+	import-newmods
+	run -0 @import --optional 'invalid-module-1001'
+	run -0 @import --opt 'invalid_1337_module'
+	# the optional flag should not propagate!
+	run ! bash -c "$(declare -p import-newmods); $(declare -p _import_bad_seterr); _import_bad_seterr --opt"
+}
+
 @test "module overrides" {
 	import-newmods
 	@import 'files'
@@ -85,5 +93,19 @@ function _import_bad_seterr() {
 	[[ "$output" == "OVERWRITTEN" ]]
 	[[ "$TOOLS_IMPORT_COUNT" -eq 1 ]]
 	[[ "$NEW_FILES_IMPORT_COUNT" -eq 1 ]]
+}
+
+@test "module parent import from overrides" {
+	import-newmods
+	SH_MOD_PATH=":$SAMPLE_DIR/newoverrides2:$SH_MOD_PATH:"
+	FILES_IMPORT_PARENTS=1
+	@import 'allmodrec'
+
+	[[ "$ORIG_FILES_IMPORT_COUNT" -eq 1 ]]
+	[[ "$NEW_FILES_IMPORT_COUNT" -eq 1 ]]
+	[[ "$OVERR2_FILES_IMPORT_COUNT" -eq 1 ]]
+
+	run -0 get_test_file
+	[[ "$output" == "SECOND!!!" ]]
 }
 

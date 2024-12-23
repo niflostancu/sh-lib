@@ -3,6 +3,10 @@
 
 NEW_FILES_IMPORT_COUNT=$(( ${NEW_FILES_IMPORT_COUNT:-0} + 1 ))
 
+if [[ -n "$FILES_IMPORT_PARENTS" ]]; then
+	@import --parent 'files'
+fi
+
 function get_test_file() {
 	echo -n "OVERWRITTEN"
 }
