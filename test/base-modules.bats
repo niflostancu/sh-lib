@@ -8,8 +8,13 @@ import-parent() {
 	source /code/base.sh
 	source "$SAMPLE_DIR/parent.sh"
 }
-import-base() {
+import-mods() {
 	source /code/base.sh
+	SH_MOD_PATH="$SAMPLE_DIR/lib"
+}
+import-newmods() {
+	source /code/base.sh
+	SH_MOD_PATH="$SAMPLE_DIR/newlib:$SAMPLE_DIR/lib"
 }
 
 @test "script module path" {
@@ -26,8 +31,7 @@ import-base() {
 }
 
 @test "module @import" {
-	import-base
-	SH_MOD_PATH="$SAMPLE_DIR/lib:"
+	import-mods
 
 	@import 'tools'
 	[[ "$TOOLS_IMPORT_COUNT" -eq 1 ]]
@@ -40,8 +44,7 @@ import-base() {
 }
 
 @test "no duplicate imports" {
-	import-base
-	SH_MOD_PATH="$SAMPLE_DIR/lib:"
+	import-mods
 
 	@import 'tools'
 	@import 'tools.sh'
@@ -51,16 +54,22 @@ import-base() {
 	[[ "$TOOLS_IMPORT_COUNT" -eq 1 ]]
 }
 
+function _import_bad_seterr() {
+	set -e
+	printf BASHOPTS:%s\\n "$-"
+	sh_log_info "Importing module with bad imports..."
+	@import "$@" 'bad' || { echo "SAMIBAGPULAAA"; return 2; } 
+}
+
 @test "module not found" {
-	import-base
-	SH_MOD_PATH="$SAMPLE_DIR/lib:"
-	run -0 ! @import 'bad'
-	run -0 ! @import 'invalid-module2'
+	import-newmods
+	run ! @import 'invalid-module1'
+	# workaround for BATS disabling errexit (-e)
+	run ! bash -c "$(declare -p import-newmods); $(declare -p _import_bad_seterr); _import_bad_seterr"
 }
 
 @test "module overrides" {
-	import-base
-	SH_MOD_PATH="$SAMPLE_DIR/newlib:$SAMPLE_DIR/lib:"
+	import-newmods
 	@import 'files'
 
 	run -0 get_test_file
@@ -68,8 +77,7 @@ import-base() {
 }
 
 @test "recursive module imports" {
-	import-base
-	SH_MOD_PATH="$SAMPLE_DIR/newlib:$SAMPLE_DIR/lib:"
+	import-newmods
 	@import 'allmodrec.sh'
 	@import 'allmodrec'
 
