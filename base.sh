@@ -9,6 +9,10 @@ https://github.com/niflostancu/sh-lib
 
 DOCS
 
+## Library customization vars
+# disable sh_* aliases (e.g., @import)
+SH_NO_ALIASES=${SH_NO_ALIASES:-}
+
 ##============================================================================##
 ##------------------- Color Printing & Logging routines ----------------------##
 ##----------------------------------------------------------------------------##
@@ -157,8 +161,9 @@ SH_MOD_PATH="$(sh_get_script_path)"
 declare -g -A _SH_MODULES_IMPORTED=()
 
 # Sources a '.sh' module (tries all paths in SH_MOD_PATH)
+# If SH_NO_ALIASES is not 1, then `@import` is defined as an alias
 # Example: @import 'mymodule' (.sh extension is added automatically)
-function @import() {
+function sh_import() {
 	local __MOD_NAME="" __MOD_PATH="" _PARENT="" _OPTIONAL=""
 	# split module path into array
 	local -a __MOD_SEARCH_PATH=()
@@ -210,6 +215,9 @@ function @import() {
 	source "$__MOD_PATH" || return 3
 	sh_log_debug "mod: $__MOD_NAME: loaded!"
 }
+if [[ -z "$SH_NO_ALIASES" ]]; then  # create @import alias
+	function @import() { sh_import "$@"; }
+fi
 
 # calls all hooks registered for a named event/function
 # usage: hooks_run EVENT_NAME
