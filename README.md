@@ -1,11 +1,13 @@
-# Shell Lib - Useful shell scripts collection
+# Shell Library - Useful shell scripts collection
 
-Small libraries implementing common shell scripting idioms (mainly in bash).
+Opinionated `bash` library implementing some common shell scripting idioms.
+Designed to be small, flexible & modular, well documented and tested!
 
 ## Features
 
 - versatile color printing & logging routines;
-- text outputting / manipulation utils;
+- text output / string manipulation utils;
+- simple bash module system (`@import`) + function hooks;
 - everything is unit-tested using BATS + Docker containers!
 
 ## Installation / distribution
@@ -15,27 +17,27 @@ There are many ways of doing this:
 
 1. Using Git Submodules
 
-Recommended only if you already use git submodules in your project:
-```sh
-# will clone this repo as submodule inside the ./sh-lib directory
-git submodule add "https://github.com/niflostancu/sh-lib.git" ./sh-lib
-```
+    Recommended only if you already use git submodules in your project:
+    ```sh
+    # will clone this repo as submodule inside the ./sh-lib directory
+    git submodule add "https://github.com/niflostancu/sh-lib.git" ./sh-lib
+    ```
 
 2. Manual downloading
 
-You can use wget to manually download the desired script, e.g.:
-```sh
-wget -O lib/base.sh "https://raw.githubusercontent.com/niflostancu/sh-lib/refs/heads/main/base.sh"
-```
+    You can use wget to manually download the desired script, e.g.:
+    ```sh
+    wget -O lib/base.sh "https://raw.githubusercontent.com/niflostancu/sh-lib/refs/heads/main/base.sh"
+    ```
 
-_(or check out [fetch.sh](https://github.com/niflostancu/fetch.sh)!)_
+    _(or check out [fetch.sh](https://github.com/niflostancu/fetch.sh)!)_
 
 3. Makefile-based automatic distribution
 
-You can use Makefile script to manage your dependencies, check out this sample:
-[dist/Makefile.dist](./dist/Makefile.dist)
+    You can use Makefile script to manage your dependencies, check out this sample:
+    [dist/Makefile.dist](./dist/Makefile.dist)
 
-## Examples
+## Usage / Examples
 
 Simply source the library (for example, `base.sh`). You can either close the
 repository inside a subdirectory in your project or simply copy download the
