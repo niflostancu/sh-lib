@@ -44,10 +44,18 @@ A common pattern is to use the parent script's base directory to find the librar
 location, which you can do easily in `bash`:
 
 ```sh
+set -eo pipefail  # RECOMMENDED: exit on first failed command
 # find the script's base directory
 SCRIPT_BASE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # source base.sh relative to the parent script's base
 source "$SCRIPT_BASE/lib/base.sh"
+```
+
+OR, as a shorter one-liner version (not caring about path sanitization):
+
+```sh
+set -eo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/lib/base.sh"
 ```
 
 Color printing & logging routines:
