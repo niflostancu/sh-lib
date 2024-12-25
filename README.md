@@ -26,8 +26,9 @@ git submodule add "https://github.com/niflostancu/sh-lib.git" ./sh-lib
 You can use wget to manually download the desired script, e.g.:
 ```sh
 wget -O lib/base.sh "https://raw.githubusercontent.com/niflostancu/sh-lib/refs/heads/main/base.sh"
-chmod lib/base.sh
 ```
+
+_(or check out [fetch.sh](https://github.com/niflostancu/fetch.sh)!)_
 
 3. Makefile-based automatic distribution
 
