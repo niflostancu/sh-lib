@@ -60,20 +60,20 @@ function sh_cecho() {
 function sh_color_echo() { sh_cecho "$@"; }
 
 ## ---- Logging functions ----
+# aliases for syslog-compatible levels
+declare -g -A SH_LOG_ALIASES=([error]=err [panic]=emerg)
 # log colors (alias key from the same map)
 SH_COLOR_PRINT_MAP+=([debug]="cyan" [info]="b-green" [err]="b-red" [emerg]="b-red")
 # environment log prefix: prepended to all logged messages
 SH_LOG_PREFIX=${SH_LOG_PREFIX:-}
-# you can register a logging callback (e.g., to also send to syslog)
-SH_LOG_CALLBACK=
 # debug enable environment var (if non-null)
 DEBUG=${DEBUG:-}
 
 # generic logging function
 function sh_log() {
 	local LEVEL="$1"; shift
-	[[ "$LEVEL" != "error" ]] || LEVEL="err"
-	! sh_is_function "$SH_LOG_CALLBACK" || "$SH_LOG_CALLBACK" "$LEVEL" "$*"
+	[[ ! -v "SH_LOG_ALIASES[$LEVEL]" ]] || LEVEL="${SH_LOG_ALIASES[$LEVEL]}"
+	sh_hooks_run "sh_log_cb" "$LEVEL" "$*"
 	sh_cecho "$LEVEL" "${SH_LOG_PREFIX:+"$SH_LOG_PREFIX: "}$*"
 }
 
@@ -221,6 +221,8 @@ fi
 
 # calls all hooks registered for a named event/function
 # usage: hooks_run EVENT_NAME
+# The callback is invoked with the hook name as its first argument ($1), then 
+# the `sh_hooks_run`-given parameters are passed in order (as $2, $3...).
 function sh_hooks_run() {
 	[[ -v _SH_FUNC_HOOKS["$1"] ]] || return 0
 	IFS=, read -ra hooks <<< "${_SH_FUNC_HOOKS["$1"]}"

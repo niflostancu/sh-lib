@@ -88,7 +88,7 @@ _log_cb_test() {
 
 @test "logging callback" {
 	import-base
-	SH_LOG_CALLBACK=_log_cb_test
+	sh_hooks_add sh_log_cb _log_cb_test
 	run -0 sh_log_info "Lets test this"
 	[ -n "$output" ] && [[ "$output" == *'LOG_CB_CALLED'* ]]
 }
