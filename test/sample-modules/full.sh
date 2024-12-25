@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 # debug breaks output checks
-DEBUG=
+SH_DEBUG_INT=
 source "$(dirname -- "${BASH_SOURCE[0]}")/../../base.sh"
 
 export PARENT_PATH=$(sh_get_script_path)

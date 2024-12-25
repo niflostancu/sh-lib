@@ -12,13 +12,21 @@ DOCS
 ## Library customization vars
 # disable sh_* aliases (e.g., @import)
 SH_NO_ALIASES=${SH_NO_ALIASES:-}
+# set to 1 to force terminal colors
+TERM_COLORS=${TERM_COLORS:-}
+# log prefix environment var: prepended to all logged messages
+SH_LOG_PREFIX=${SH_LOG_PREFIX:-}
+# debug enable environment var (if non-null)
+DEBUG=${DEBUG:-}
+# enable internal function debugging
+SH_DEBUG_INT=${SH_DEBUG_INT:-}
+
 
 ##============================================================================##
 ##------------------- Color Printing & Logging routines ----------------------##
 ##----------------------------------------------------------------------------##
 
 # test if the terminal supports colors
-TERM_COLORS=${TERM_COLORS:-}
 if test -t 1; then
 	_tput_colors=$(tput colors 2>/dev/null || true)
 	if test -z "$_tput_colors"; then
@@ -64,10 +72,6 @@ function sh_color_echo() { sh_cecho "$@"; }
 declare -g -A SH_LOG_ALIASES=([error]=err [panic]=emerg)
 # log colors (alias key from the same map)
 SH_COLOR_PRINT_MAP+=([debug]="cyan" [info]="b-green" [err]="b-red" [emerg]="b-red")
-# environment log prefix: prepended to all logged messages
-SH_LOG_PREFIX=${SH_LOG_PREFIX:-}
-# debug enable environment var (if non-null)
-DEBUG=${DEBUG:-}
 
 # generic logging function
 function sh_log() {
@@ -78,14 +82,14 @@ function sh_log() {
 }
 
 # only logs if the DEBUG variable is non-null
-function sh_log_debug() {
-	[[ -n "$DEBUG" ]] || return 0
-	sh_log "debug" "$@"
-}
+function sh_log_debug() { [[ -z "$DEBUG" ]] || sh_log "debug" "$@"; }
 function sh_log_info() { sh_log "info" "$@"; }
 function sh_log_error() { sh_log "err" "$@" >&2; }
 function sh_log_panic() { sh_log "emerg" "$@" >&2; exit 1; }
-
+# intenal debugging routine
+function _sh_debug_int() {
+	[[ -z "$SH_DEBUG_INT" ]] || sh_log "debug" "$@"
+}
 
 ##============================================================================##
 ##-------------------------- String / output helpers -------------------------##
@@ -201,7 +205,7 @@ function sh_import() {
 	if [[ -z "$__MOD_PATH" || ! -f "$__MOD_PATH" ]]; then
 		[[ -z "$_OPTIONAL" ]] || return 0
 		sh_log_error "Module not found: '$__MOD_NAME.sh'"
-		sh_log_debug "Module path: '$SH_MOD_PATH'"
+		_sh_debug_int "Module path: '$SH_MOD_PATH'"
 		return 2
 	fi
 	if [[ -v _SH_MODULES_IMPORTED["$__MOD_PATH"] ]]; then
@@ -213,7 +217,7 @@ function sh_import() {
 
 	# finally: source the module!
 	source "$__MOD_PATH" || return 3
-	sh_log_debug "mod: $__MOD_NAME: loaded!"
+	_sh_debug_int "mod: $__MOD_NAME: loaded!"
 }
 if [[ -z "$SH_NO_ALIASES" ]]; then  # create @import alias
 	function @import() { sh_import "$@"; }
