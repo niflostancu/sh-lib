@@ -96,9 +96,10 @@ function _sh_debug_int() {
 ##----------------------------------------------------------------------------##
 
 # Silences the output of a command (use in front)
-function @silent() {
-	"$@" >/dev/null 2>&1
-}
+function sh_silent() { "$@" >/dev/null 2>&1; }
+if [[ -z "$SH_NO_ALIASES" ]]; then
+	function @silent() { sh_silent "$@"; }
+fi
 
 # Removes whitespace from beginning/end of string
 function sh_str_trim() {
